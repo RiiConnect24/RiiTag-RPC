@@ -7,6 +7,6 @@ you are therefore free to use, modify or redistribute them, provided that you in
 ## Tool overview
 A brief overview of the tools in this directory:
 
-* [asset uploader](asset_uploader/README.md) - A script to automatically download 3D covers
+* [asset uploader](asset_uploader/) - A script to automatically download 3D covers
   for popular games and upload them to a Discord application.
 
