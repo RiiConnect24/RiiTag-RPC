@@ -1,0 +1,75 @@
+import time
+from datetime import datetime, timedelta
+from threading import Thread
+
+from .exceptions import RiitagNotFoundError
+from .preferences import Preferences
+from .user import User, RiitagInfo
+
+
+class RiitagWatcher(Thread):
+    def __init__(self, preferences: Preferences, user: User,
+                 update_callback, message_callback, *args, **kwargs):
+        super().__init__(*args, **kwargs, daemon=True)
+
+        self.preferences = preferences
+        self._user = user
+        self._update_callback = update_callback
+        self._message_callback = message_callback
+
+        self._run = True
+        self._last_check = datetime(year=2000, month=1, day=1)  # force check on first run
+        self._no_riitag_warning_shown = False
+
+        self._last_riitag: RiitagInfo = RiitagInfo()
+
+    @property
+    def interval(self):
+        return self.preferences.check_interval
+
+    @property
+    def presence_timeout(self):
+        return self.preferences.presence_timeout
+
+    def start(self):
+        self._run = True
+
+        super().start()
+
+    def stop(self):
+        self._run = False
+
+    def _get_riitag(self):
+        try:
+            riitag = self._user.fetch_riitag()
+        except RiitagNotFoundError:
+            if not self._no_riitag_warning_shown:
+                # TODO: Show error dialog with options
+                pass
+
+            return None
+
+        return riitag
+
+    def run(self):
+        while self._run:
+            new_riitag = self._last_riitag
+
+            now = datetime.utcnow()
+            if now - self._last_check >= timedelta(seconds=self.interval):
+                # time for a new check!
+                self._last_check = now
+
+                new_riitag = self._get_riitag()
+
+            if self._last_riitag:
+                last_play_time = self._last_riitag.last_played.time
+                if now - last_play_time >= timedelta(minutes=self.presence_timeout):
+                    new_riitag.outdated = True
+
+            if new_riitag != self._last_riitag:
+                self._update_callback(new_riitag)
+
+                self._last_riitag = new_riitag
+
+            time.sleep(1)

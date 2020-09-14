@@ -1,0 +1,2 @@
+class RiitagNotFoundError(Exception):
+    pass
