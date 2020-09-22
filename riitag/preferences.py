@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 
@@ -30,6 +31,9 @@ class Preferences:
 
     def get(self, value):
         return self._values.get(value, self.DEFAULTS.get(value))
+
+    def reset(self):
+        self._values = copy.copy(self.DEFAULTS)
 
     @property
     def check_interval(self):

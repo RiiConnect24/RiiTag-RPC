@@ -41,7 +41,7 @@ class PreferenceButton(Button):
 
         super().__init__(str(self.value))
 
-    def _update(self):
+    def update(self):
         self.text = str(self.value)
 
     @property
@@ -54,7 +54,7 @@ class PreferenceButton(Button):
             return
 
         self.value = new_value
-        self._update()
+        self.update()
 
     def decrease(self):
         new_value = self.value - self.increments
@@ -62,7 +62,7 @@ class PreferenceButton(Button):
             return
 
         self.value = new_value
-        self._update()
+        self.update()
 
 
 class Menu(metaclass=abc.ABCMeta):
@@ -366,6 +366,7 @@ class MainMenu(Menu):
         self.menu_logout_button = Button('Logout', handler=self.quit_app)
 
         self.settings_back_button = Button('Back...', width=12, handler=lambda: self._set_state('Menu'))
+        self.settings_reset_button = Button('Reset...', width=12, handler=self._reset_preferences)
         self.settings_pres_timeout_button = PreferenceButton(
             value=self.app.preferences.presence_timeout,
             increments=10,
@@ -401,7 +402,7 @@ class MainMenu(Menu):
                     VSplit([Label('Presence Timeout (min.):'), self.settings_pres_timeout_button], width=15),
                     VSplit([Label('Refresh Interval (sec.):'), self.settings_check_interval_button], padding=3),
                     Label(''),
-                    self.settings_back_button
+                    VSplit([self.settings_back_button, self.settings_reset_button], align=WindowAlign.CENTER)
                 ]),
                 padding_left=3,
                 padding_top=2
@@ -469,13 +470,17 @@ class MainMenu(Menu):
         def prev_option(event):
             focus_previous(event)
 
-        @kb.add('left')
-        def decrease_preference(_):
-            self._modify_setting(SettingsModifyMode.DECREASE)
-
         @kb.add('right')
-        def increase_preference(_):
-            self._modify_setting(SettingsModifyMode.INCREASE)
+        def increase_preference(event):
+            modified = self._modify_setting(SettingsModifyMode.INCREASE)
+            if not modified:  # treat as regular event
+                focus_next(event)
+
+        @kb.add('left')
+        def decrease_preference(event):
+            modified = self._modify_setting(SettingsModifyMode.DECREASE)
+            if not modified:  # treat as regular event
+                focus_previous(event)
 
         return kb
 
@@ -484,12 +489,15 @@ class MainMenu(Menu):
     ################
 
     def _modify_setting(self, mode):
+        is_modified = False
+
         if self.settings_check_interval_button.is_focused:
             if mode == SettingsModifyMode.INCREASE:
                 self.settings_check_interval_button.increase()
             elif mode == SettingsModifyMode.DECREASE:
                 self.settings_check_interval_button.decrease()
 
+            is_modified = True
             self.app.preferences.check_interval = self.settings_check_interval_button.value
 
         elif self.settings_pres_timeout_button.is_focused:
@@ -498,9 +506,21 @@ class MainMenu(Menu):
             elif mode == SettingsModifyMode.DECREASE:
                 self.settings_pres_timeout_button.decrease()
 
+            is_modified = True
             self.app.preferences.presence_timeout = self.settings_pres_timeout_button.value
 
         self.app.preferences.save('cache/prefs.json')
+
+        return is_modified
+
+    def _reset_preferences(self):
+        self.app.preferences.reset()
+        self.app.preferences.save('cache/prefs.json')
+
+        self.settings_pres_timeout_button.value = self.app.preferences.presence_timeout
+        self.settings_pres_timeout_button.update()
+        self.settings_check_interval_button.value = self.app.preferences.check_interval
+        self.settings_check_interval_button.update()
 
     def _set_state(self, state):
         self.right_panel_state = state
