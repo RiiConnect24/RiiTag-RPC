@@ -35,6 +35,14 @@ class Preferences:
     def check_interval(self):
         return self.get('check_interval')
 
+    @check_interval.setter
+    def check_interval(self, value):
+        self._values['check_interval'] = value
+
     @property
     def presence_timeout(self):
         return self.get('presence_timeout')
+
+    @presence_timeout.setter
+    def presence_timeout(self, value):
+        self._values['presence_timeout'] = value

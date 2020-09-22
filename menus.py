@@ -7,9 +7,11 @@ import os
 import threading
 import time
 import webbrowser
+from enum import Enum
 from typing import TYPE_CHECKING
 
 import requests
+from prompt_toolkit.application import get_app
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
 from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
@@ -24,6 +26,43 @@ if TYPE_CHECKING:
 
 with open('banner.txt', 'r+') as banner:
     BANNER = banner.read()
+
+
+class SettingsModifyMode(Enum):
+    INCREASE = 1
+    DECREASE = 0
+
+
+class PreferenceButton(Button):
+    def __init__(self, value, increments, limits: tuple):
+        self.value = value
+        self.increments = increments
+        self.limits = limits
+
+        super().__init__(str(self.value))
+
+    def _update(self):
+        self.text = str(self.value)
+
+    @property
+    def is_focused(self):
+        return get_app().layout.current_window == self.window
+
+    def increase(self):
+        new_value = self.value + self.increments
+        if new_value > self.limits[1]:
+            return
+
+        self.value = new_value
+        self._update()
+
+    def decrease(self):
+        new_value = self.value - self.increments
+        if new_value < self.limits[0]:
+            return
+
+        self.value = new_value
+        self._update()
 
 
 class Menu(metaclass=abc.ABCMeta):
@@ -326,7 +365,17 @@ class MainMenu(Menu):
         self.menu_exit_button = Button('Exit', handler=self.quit_app)
         self.menu_logout_button = Button('Logout', handler=self.quit_app)
 
-        self.settings_back_button = Button('Back...', handler=lambda: self._set_state('Menu'))
+        self.settings_back_button = Button('Back...', width=12, handler=lambda: self._set_state('Menu'))
+        self.settings_pres_timeout_button = PreferenceButton(
+            value=self.app.preferences.presence_timeout,
+            increments=10,
+            limits=(10, 120)
+        )
+        self.settings_check_interval_button = PreferenceButton(
+            value=self.app.preferences.check_interval,
+            increments=10,
+            limits=(10, 60)
+        )
 
         self.right_panel_state = 'Menu'
         self.menu_layout = Frame(
@@ -345,6 +394,13 @@ class MainMenu(Menu):
         self.settings_layout = Frame(
             Box(
                 HSplit([
+                    Window(FormattedTextControl(HTML(
+                        'This is where you can modify settings\nregarding the underlying presence\nwatcher.'
+                    )), wrap_lines=True, width=25),
+                    Label(''),
+                    VSplit([Label('Presence Timeout (min.):'), self.settings_pres_timeout_button], width=15),
+                    VSplit([Label('Refresh Interval (sec.):'), self.settings_check_interval_button], padding=3),
+                    Label(''),
                     self.settings_back_button
                 ]),
                 padding_left=3,
@@ -413,11 +469,38 @@ class MainMenu(Menu):
         def prev_option(event):
             focus_previous(event)
 
+        @kb.add('left')
+        def decrease_preference(_):
+            self._modify_setting(SettingsModifyMode.DECREASE)
+
+        @kb.add('right')
+        def increase_preference(_):
+            self._modify_setting(SettingsModifyMode.INCREASE)
+
         return kb
 
     ################
     # Helper Funcs #
     ################
+
+    def _modify_setting(self, mode):
+        if self.settings_check_interval_button.is_focused:
+            if mode == SettingsModifyMode.INCREASE:
+                self.settings_check_interval_button.increase()
+            elif mode == SettingsModifyMode.DECREASE:
+                self.settings_check_interval_button.decrease()
+
+            self.app.preferences.check_interval = self.settings_check_interval_button.value
+
+        elif self.settings_pres_timeout_button.is_focused:
+            if mode == SettingsModifyMode.INCREASE:
+                self.settings_pres_timeout_button.increase()
+            elif mode == SettingsModifyMode.DECREASE:
+                self.settings_pres_timeout_button.decrease()
+
+            self.app.preferences.presence_timeout = self.settings_pres_timeout_button.value
+
+        self.app.preferences.save('cache/prefs.json')
 
     def _set_state(self, state):
         self.right_panel_state = state
