@@ -184,12 +184,12 @@ class SplashScreen(Menu):
 
     @property
     def is_token_cached(self):
-        return os.path.isfile('token.json')
+        return os.path.isfile('cache/token.json')
 
     def _refresh_token(self, token):
         try:
             token.refresh()
-            token.save('token.json')
+            token.save('cache/token.json')
 
             self.app.token = token
             self.app.user = token.get_user()
@@ -226,7 +226,7 @@ class SplashScreen(Menu):
 
     def _login(self):
         if self.is_token_cached:
-            with open('token.json', 'r') as file:
+            with open('cache/token.json', 'r') as file:
                 token_data = json.load(file)
             try:
                 token = oauth2.OAuth2Token(self.app.oauth_client, **token_data)
@@ -262,7 +262,7 @@ class SetupMenu(Menu):
 
         self.state = 'setup_start'
 
-        if not os.path.isfile('token.json'):  # new user
+        if not os.path.isfile('cache/token.json'):  # new user
             self.setup_start_layout = Window(FormattedTextControl(HTML(
                 '\n\n\n<b>Hello!</b> It looks like this is your first time using this program.\n'
                 'No worries! Let\'s get your Discord account linked up first.\n\n\n'
@@ -333,7 +333,7 @@ class SetupMenu(Menu):
         self.update()
 
         token = self.app.oauth_client.get_token(code)
-        token.save('token.json')
+        token.save('cache/token.json')
         self.app.token = token
 
         self.app.user = token.get_user()
