@@ -363,7 +363,7 @@ class MainMenu(Menu):
 
         self.menu_settings_button = Button('Settings', handler=lambda: self._set_state('Settings'))
         self.menu_exit_button = Button('Exit', handler=self.quit_app)
-        self.menu_logout_button = Button('Logout', handler=self.quit_app)
+        self.menu_logout_button = Button('Logout', handler=self._logout)
 
         self.settings_back_button = Button('Back...', width=12, handler=lambda: self._set_state('Menu'))
         self.settings_reset_button = Button('Reset...', width=12, handler=self._reset_preferences)
@@ -488,6 +488,9 @@ class MainMenu(Menu):
     # Helper Funcs #
     ################
 
+    def _logout(self):
+        self.app.show_message('Test', 'This is a test message')
+
     def _modify_setting(self, mode):
         is_modified = False
 
@@ -533,6 +536,9 @@ class MainMenu(Menu):
             self.app.layout.focus(self.settings_back_button)
 
     def _update_riitag(self, riitag: user.RiitagInfo):
+        if not riitag:
+            return
+
         self.riitag_info = riitag
 
         if not riitag.outdated:

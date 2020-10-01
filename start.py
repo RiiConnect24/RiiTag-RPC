@@ -4,8 +4,12 @@ import sys
 
 import nest_asyncio
 from prompt_toolkit.application import Application
-from prompt_toolkit.layout import Layout, DynamicContainer
+from prompt_toolkit.formatted_text import HTML
+from prompt_toolkit.layout import Layout, DynamicContainer, FloatContainer, \
+    Float, FormattedTextControl
+from prompt_toolkit.layout.containers import HSplit, VSplit, Window
 from prompt_toolkit.shortcuts import set_title
+from prompt_toolkit.widgets import Button
 from prompt_toolkit.widgets import Frame
 
 import menus
@@ -29,6 +33,7 @@ if not os.path.isdir('cache'):
 class RiiTagApplication(Application):
     def __init__(self, *args, **kwargs):
         self._current_menu: menus.Menu = None
+        self._float_message_layout = None
 
         self.set_menu(menus.SplashScreen)
         set_title(self.version_string)
@@ -53,6 +58,16 @@ class RiiTagApplication(Application):
         menu_layout = self._current_menu.get_layout()
         if self._current_menu.is_framed:
             menu_layout = Frame(menu_layout, title=self.header_string)
+
+        if self._float_message_layout:
+            menu_layout = FloatContainer(
+                content=menu_layout,
+                floats=[
+                    Float(
+                        content=self._float_message_layout
+                    )
+                ]
+            )
 
         return menu_layout
 
@@ -93,6 +108,33 @@ class RiiTagApplication(Application):
         if hasattr(self, '_is_running'):
             self.invalidate()
         self._current_menu.on_start()
+
+    def show_message(self, title, message, callback=None):
+        cancel_button = Button('Cancel', handler=lambda: response_received(False))
+        ok_button = Button('OK', handler=lambda: response_received(True))
+
+        def response_received(is_ok):
+            if callback:
+                callback(is_ok)
+
+            self._float_message_layout = None
+            self.layout.focus_next()
+            self.invalidate()
+
+        message_frame = Frame(
+            HSplit([
+                Window(FormattedTextControl(HTML(message + '\n\n'))),
+                VSplit([
+                    cancel_button,
+                    ok_button
+                ], padding=3)
+            ], padding=1),
+            title=title,
+        )
+
+        self._float_message_layout = message_frame
+        self.layout.focus(cancel_button)
+        self.invalidate()
 
 
 def main():
