@@ -488,8 +488,22 @@ class MainMenu(Menu):
     # Helper Funcs #
     ################
 
+    def _logout_callback(self, confirm):
+        if confirm:
+            os.remove('cache/token.json')
+            self.app.exit()
+
     def _logout(self):
-        self.app.show_message('Test', 'This is a test message')
+        self.app.show_message(
+            'Logout Confirmation',
+
+            'Are you sure you want to log out?\n\n'
+            'This will close RiiTag-RPC, and you\n'
+            'will have to log in again the next time\n'
+            'you use it.',
+
+            callback=self._logout_callback
+        )
 
     def _modify_setting(self, mode):
         is_modified = False

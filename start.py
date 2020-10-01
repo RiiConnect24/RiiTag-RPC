@@ -7,7 +7,7 @@ from prompt_toolkit.application import Application
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.layout import Layout, DynamicContainer, FloatContainer, \
     Float, FormattedTextControl
-from prompt_toolkit.layout.containers import HSplit, VSplit, Window
+from prompt_toolkit.layout.containers import HSplit, VSplit, Window, WindowAlign
 from prompt_toolkit.shortcuts import set_title
 from prompt_toolkit.widgets import Button
 from prompt_toolkit.widgets import Frame
@@ -123,11 +123,11 @@ class RiiTagApplication(Application):
 
         message_frame = Frame(
             HSplit([
-                Window(FormattedTextControl(HTML(message + '\n\n'))),
+                Window(FormattedTextControl(HTML(message + '\n\n')), align=WindowAlign.CENTER),
                 VSplit([
                     cancel_button,
                     ok_button
-                ], padding=3)
+                ], padding=3, align=WindowAlign.CENTER)
             ], padding=1),
             title=title,
         )
