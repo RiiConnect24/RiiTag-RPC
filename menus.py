@@ -370,7 +370,7 @@ class MainMenu(Menu):
         self.riitag_info = user.RiitagInfo()  # placeholder
 
         self.menu_settings_button = Button('Settings', handler=lambda: self._set_state('Settings'))
-        self.menu_view_button = Button('View Tag', handler=self._view_riitag)
+        self.menu_view_button = Button('View Tag', handler=self.view_riitag)
         self.menu_exit_button = Button('Exit', handler=self.quit_app)
         self.menu_logout_button = Button('Logout', handler=self._logout)
 
@@ -573,16 +573,15 @@ class MainMenu(Menu):
 
         self.update()
 
-    def _view_riitag(self):
+    def view_riitag(self):
         client_id = self.app.user.id
         tag_url = "https://tag.rc24.xyz/" + client_id
         try:
             webbrowser.open(tag_url)
         except webbrowser.Error:
-            self.waiting_layout.children.append(
-                Window(FormattedTextControl(HTML(
-                    'Yikes, that didn\'t work. Please manually paste this URL into your browser:\n' + tag_url
-                )), align=WindowAlign.CENTER, wrap_lines=False)
+            self.app_show_message(
+                'Title',
+                'Yikes, that didn\'t work. Please manually paste this URL into your browser:\n' + tag_url
             )
         
 
