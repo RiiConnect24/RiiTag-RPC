@@ -171,7 +171,11 @@ class OAuth2Client:
         }
         query_str = urllib.parse.urlencode(query)
 
-        return AUTHORIZE_ENDPOINT + '?' + query_str
+        return AUTHORIZE_ENDPOINT + '?' + query_str\
+
+    @property
+    def client_id(self):
+        return self.config.get('client_id')
 
     def wait_for_code(self):
         if not self._http_server:
