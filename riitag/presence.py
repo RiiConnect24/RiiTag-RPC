@@ -2,7 +2,10 @@ import calendar
 
 import pypresence
 
-from .user import RiitagInfo
+from os import path
+from requests import get
+
+from .user import RiitagInfo, RiitagTitle
 
 
 def format_presence(riitag_info: RiitagInfo):
@@ -13,7 +16,7 @@ def format_presence(riitag_info: RiitagInfo):
 
     return {
         'details': riitag_info.name,
-        'state': f'Playing {last_played.game_id} ({last_played.console})',
+        'state': f'Playing {RiitagTitle(last_played.game_id)} ({last_played.console.title()})',
         'start': start_timestamp,
 
         'large_image': 'console_wii',

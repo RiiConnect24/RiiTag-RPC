@@ -375,7 +375,7 @@ class MainMenu(Menu):
         self.settings_check_interval_button = PreferenceButton(
             value=self.app.preferences.check_interval,
             increments=10,
-            limits=(10, 60)
+            limits=(30, 60)
         )
 
         self.right_panel_state = 'Menu'
@@ -452,7 +452,7 @@ class MainMenu(Menu):
                             Label(HTML(f'<b>Games:</b>  {len(game_labels)}')),
                             *game_labels
                         ]), padding_left=3, padding_top=2
-                    ), title='Riitag'),
+                    ), title='RiiTag'),
                 right_panel_layout
             ])
         ])
