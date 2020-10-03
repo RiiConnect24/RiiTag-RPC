@@ -15,8 +15,8 @@ def format_presence(riitag_info: RiitagInfo):
         start_timestamp = calendar.timegm(last_played.time.utctimetuple())
 
     return {
-        'details': riitag_info.name,
-        'state': f'Playing {RiitagTitle(last_played.game_id)} ({last_played.console.title()})',
+        'details': f'Playing {RiitagTitle(last_played.game_id)} ({last_played.console.title()})',
+        'state': f'https://gametdb.com/{last_played.console.title()}/{last_played.game_id}',
         'start': start_timestamp,
 
         'large_image': 'console_wii',

@@ -6,7 +6,7 @@ from .exceptions import RiitagNotFoundError
 from os import path
 
 RIITAG_ENDPOINT = 'http://tag.rc24.xyz/{}/json'
-TITLES_URL = "https://www.gametdb.com/wiitdb.txt?LANG=EN"
+TITLES_URL = 'https://www.gametdb.com/wiitdb.txt?LANG=EN'
 HEADERS = {'User-Agent': 'RiiTag-RPC WatchThread v1'}
 
 
