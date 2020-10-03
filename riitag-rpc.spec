@@ -5,7 +5,8 @@ block_cipher = None
 
 a = Analysis(['start.py'],
              binaries=[],
-             datas=[('config.json', './')],
+             datas=[('config.json', './'),
+					('banner.txt', './')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
