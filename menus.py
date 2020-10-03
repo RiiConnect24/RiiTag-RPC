@@ -21,10 +21,17 @@ from prompt_toolkit.widgets import Button, Box, Label, Frame
 
 from riitag import oauth2, user, watcher, presence
 
+# Get resource when frozen with PyInstaller
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
+	
+	
 if TYPE_CHECKING:
     from start import RiiTagApplication
 
-with open('banner.txt', 'r+') as banner:
+with open(resource_path('banner.txt'), 'r+') as banner:
     BANNER = banner.read()
 
 
