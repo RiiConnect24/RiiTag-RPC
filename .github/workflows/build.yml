@@ -1,0 +1,29 @@
+name: Build
+
+on: [push]
+
+jobs:
+  Build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macOS-latest]
+
+    steps:
+    - name: Obtain latest version of the repository
+      uses: actions/checkout@v1
+    - name: Set up Python 3
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+    - name: Install requirements with PIP
+      run: pip install -r requirements.txt
+    - name: Install pyinstaller
+      run: pip install pyinstaller
+    - name: Build RiiTag RPC
+      run: pyinstaller riitag-rpc.spec
+    - name: Publish Build Artifacts
+      uses: actions/upload-artifact@master
+      with:
+        name: ${{ matrix.os }}
+        path: dist
