@@ -370,6 +370,7 @@ class MainMenu(Menu):
         self.riitag_info = user.RiitagInfo()  # placeholder
 
         self.menu_settings_button = Button('Settings', handler=lambda: self._set_state('Settings'))
+        self.menu_view_button = Button('View Tag', handler=self.view_riitag)
         self.menu_exit_button = Button('Exit', handler=self.quit_app)
         self.menu_logout_button = Button('Logout', handler=self._logout)
 
@@ -392,6 +393,7 @@ class MainMenu(Menu):
                 HSplit([
                     self.menu_settings_button,
                     Label(''),
+                    self.menu_view_button,
                     self.menu_exit_button,
                     self.menu_logout_button,
                 ]),
@@ -570,6 +572,18 @@ class MainMenu(Menu):
             self.app.rpc_handler.clear()
 
         self.update()
+
+    def view_riitag(self):
+        client_id = self.app.user.id
+        tag_url = "https://tag.rc24.xyz/" + client_id
+        try:
+            webbrowser.open(tag_url)
+        except webbrowser.Error:
+            self.app_show_message(
+                'Title',
+                'Yikes, that didn\'t work. Please manually paste this URL into your browser:\n' + tag_url
+            )
+        
 
     def _start_thread(self):
         self.app.riitag_watcher = watcher.RiitagWatcher(
