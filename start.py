@@ -1,5 +1,6 @@
 import json
 import os
+import sentry_sdk
 import sys
 
 import nest_asyncio
@@ -14,6 +15,11 @@ from prompt_toolkit.widgets import Frame
 
 import menus
 from riitag import oauth2, user, watcher, presence, preferences
+
+sentry_sdk.init(
+    "https://0206915cd7604929997a753583292296@o107347.ingest.sentry.io/5450405",
+    traces_sample_rate=1.0
+)
 
 nest_asyncio.apply()
 

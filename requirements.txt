@@ -2,3 +2,4 @@ requests
 prompt_toolkit
 pypresence
 nest_asyncio
+sentry_sdk
