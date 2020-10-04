@@ -57,8 +57,8 @@ class RiitagTitle:
 
     def download_titles(self):
         if not path.exists("cache/titles.txt"):
-            f = open("cache/titles.txt", "w")
-            f.write(requests.get(TITLES_URL, headers=HEADERS).text)
+            f = open("cache/titles.txt", "w", encoding='utf8')
+            f.write(requests.get(TITLES_URL, headers=HEADERS).text.encode('utf8').decode('ascii', 'ignore'))
             f.close()
 
     def load_titles(self):
