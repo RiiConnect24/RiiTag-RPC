@@ -6,10 +6,10 @@ from .user import RiitagInfo, RiitagTitle
 
 
 def format_presence(riitag_info: RiitagInfo):
-    if not riitag_info.last_played:
+    last_played = riitag_info.last_played
+    if not last_played:
         return {}
 
-    last_played = riitag_info.last_played
     start_timestamp = calendar.timegm(last_played.time.utctimetuple())
 
     title = RiitagTitle(last_played.game_id)
@@ -20,7 +20,7 @@ def format_presence(riitag_info: RiitagInfo):
         'start': start_timestamp,
 
         'large_image': 'console_wii',
-        'large_text': 'Playing on Wii',
+        'large_text': f'Playing on {last_played.console.title()}',
 
         'small_image': 'logo',
         'small_text': 'tag.rc24.xyz',
