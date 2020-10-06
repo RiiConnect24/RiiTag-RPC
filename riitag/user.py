@@ -1,9 +1,9 @@
 import datetime
+from os import path
 
 import requests
 
 from .exceptions import RiitagNotFoundError
-from os import path
 
 RIITAG_ENDPOINT = 'http://tag.rc24.xyz/{}/json'
 TITLES_URL = 'https://www.gametdb.com/wiitdb.txt?LANG=EN'
@@ -45,15 +45,18 @@ class RiitagInfo:
 
         return self.last_played == other.last_played and self.outdated == other.outdated
 
+
 class RiitagTitle:
     def __init__(self, game_id):
         self.game_id: str = game_id
+        self.titles = {}
 
         self.download_titles()
         self.load_titles()
 
-    def __str__(self):
-        return self.titles[self.game_id]
+    @property
+    def name(self):
+        return self.titles.get(self.game_id) or self.game_id
 
     def download_titles(self):
         if not path.exists("cache/titles.txt"):
@@ -74,6 +77,7 @@ class RiitagTitle:
                 self.titles[game_id] = game_name
 
         return self.titles
+
 
 class User:
     def __init__(self, **kwargs):
