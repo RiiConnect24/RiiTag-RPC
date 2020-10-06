@@ -2,25 +2,25 @@ import calendar
 
 import pypresence
 
-from os import path
-from requests import get
-
 from .user import RiitagInfo, RiitagTitle
 
 
 def format_presence(riitag_info: RiitagInfo):
     last_played = riitag_info.last_played
-    start_timestamp = None
-    if last_played:
-        start_timestamp = calendar.timegm(last_played.time.utctimetuple())
+    if not last_played:
+        return {}
+
+    start_timestamp = calendar.timegm(last_played.time.utctimetuple())
+
+    title = RiitagTitle(last_played.game_id)
 
     return {
-        'details': f'Playing {RiitagTitle(last_played.game_id)} ({last_played.console.title()})',
+        'details': f'Playing {title.name}!',
         'state': f'https://gametdb.com/{last_played.console.title()}/{last_played.game_id}',
         'start': start_timestamp,
 
         'large_image': 'console_wii',
-        'large_text': 'Playing on Wii',
+        'large_text': f'Playing on {last_played.console.title()}',
 
         'small_image': 'logo',
         'small_text': 'tag.rc24.xyz',

@@ -22,6 +22,7 @@ from prompt_toolkit.widgets import Button, Box, Label, Frame
 
 from riitag import oauth2, user, watcher, presence
 
+
 # Get resource when frozen with PyInstaller
 def resource_path(relative_path):
     if hasattr(sys, '_MEIPASS'):
@@ -579,11 +580,10 @@ class MainMenu(Menu):
         try:
             webbrowser.open(tag_url)
         except webbrowser.Error:
-            self.app_show_message(
+            self.app.show_message(
                 'Title',
                 'Yikes, that didn\'t work. Please manually paste this URL into your browser:\n' + tag_url
             )
-        
 
     def _start_thread(self):
         self.app.riitag_watcher = watcher.RiitagWatcher(
