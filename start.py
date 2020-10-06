@@ -41,6 +41,12 @@ class RiiTagApplication(Application):
         self._current_menu: menus.Menu = None
         self._float_message_layout = None
 
+        self.preferences = preferences.Preferences.load('cache/prefs.json')
+        self.oauth_client = oauth2.OAuth2Client(CONFIG.get('oauth2'))
+        self.rpc_handler = presence.RPCHandler(
+            CONFIG.get('rpc', {}).get('client_id')
+        )
+
         self.set_menu(menus.SplashScreen)
         set_title(self.version_string)
 
@@ -51,11 +57,6 @@ class RiiTagApplication(Application):
         self.token: oauth2.OAuth2Token = None
         self.user: user.User = None
 
-        self.preferences = preferences.Preferences.load('cache/prefs.json')
-        self.oauth_client = oauth2.OAuth2Client(CONFIG.get('oauth2'))
-        self.rpc_handler = presence.RPCHandler(
-            CONFIG.get('rpc', {}).get('client_id')
-        )
         self.riitag_watcher: watcher.RiitagWatcher = None
 
         self.oauth_client.start_server(CONFIG.get('port', 4000))
