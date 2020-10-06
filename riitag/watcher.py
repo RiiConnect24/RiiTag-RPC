@@ -1,10 +1,16 @@
 import time
 from datetime import datetime, timedelta
 from threading import Thread
+from typing import TYPE_CHECKING
+
+from prompt_toolkit.application import get_app
 
 from .exceptions import RiitagNotFoundError
 from .preferences import Preferences
 from .user import User, RiitagInfo
+
+if TYPE_CHECKING:
+    from start import RiiTagApplication
 
 
 class RiitagWatcher(Thread):
@@ -44,10 +50,13 @@ class RiitagWatcher(Thread):
             riitag = self._user.fetch_riitag()
         except RiitagNotFoundError:
             if not self._no_riitag_warning_shown:
-                # TODO: Show error dialog with options
-                pass
+                app: RiiTagApplication = get_app()
+                app.show_message(
+                    'RiiTag not found',
+                    'We couldn\'t find your RiiTag.\n\nTo create one, please visit https://tag.rc24.xyz/'
+                )
 
-            return None
+            return RiitagInfo()
 
         return riitag
 
