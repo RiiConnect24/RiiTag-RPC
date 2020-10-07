@@ -1,9 +1,9 @@
 import json
 import os
-import sentry_sdk
 import sys
 
 import nest_asyncio
+import sentry_sdk
 from prompt_toolkit.application import Application
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.layout import Layout, DynamicContainer, FloatContainer, \
@@ -16,15 +16,11 @@ from prompt_toolkit.widgets import Frame
 import menus
 from riitag import oauth2, user, watcher, presence, preferences
 
-sentry_sdk.init(
-    "https://0206915cd7604929997a753583292296@o107347.ingest.sentry.io/5450405",
-    traces_sample_rate=1.0
-)
-
 nest_asyncio.apply()
 
 
 # Get resource when frozen with PyInstaller
+# noinspection PyProtectedMember
 def resource_path(relative_path):
     if hasattr(sys, '_MEIPASS'):
         return os.path.join(sys._MEIPASS, relative_path)
@@ -39,6 +35,13 @@ except FileNotFoundError:
     print('[!] Please re-download this program or create it manually.')
 
     sys.exit(1)
+
+VERSION = CONFIG.get('version', '<unknown_version>')
+sentry_sdk.init(
+    "https://0206915cd7604929997a753583292296@o107347.ingest.sentry.io/5450405",
+    traces_sample_rate=1.0,
+    release=f'riitag-rpc@{VERSION}'
+)
 
 if not os.path.isdir('cache'):
     os.mkdir('cache/')
@@ -104,9 +107,7 @@ class RiiTagApplication(Application):
 
     @property
     def version_string(self):
-        version = CONFIG.get('version', '<unknown version>')
-
-        return f'RiiTag-RPC v{version}'
+        return f'RiiTag-RPC v{VERSION}'
 
     @property
     def header_string(self):
