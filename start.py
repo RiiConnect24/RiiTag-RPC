@@ -36,7 +36,7 @@ try:
         with open(resource_path('config.json'), 'w') as file:
             CONFIG['user_id'] = str(uuid.uuid4())
 
-            json.dump(CONFIG, file, indent=4)
+            json.dump(CONFIG, file, indent=2)
 except FileNotFoundError:
     print('[!] The config file seems to be missing.')
     print('[!] Please re-download this program or create it manually.')
