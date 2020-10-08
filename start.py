@@ -1,12 +1,11 @@
 import json
 import os
 import sys
-import threading
 import uuid
 
 import nest_asyncio
 import sentry_sdk
-from prompt_toolkit.application import Application, get_app
+from prompt_toolkit.application import Application
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.layout import Layout, DynamicContainer, FloatContainer, \
     Float, FormattedTextControl
@@ -21,40 +20,41 @@ from riitag import oauth2, user, watcher, presence, preferences
 nest_asyncio.apply()
 
 
-def on_error(exc_type, exc_value, exc_traceback):
-    app: RiiTagApplication = get_app()
-    if app:
-        app.show_message(
-            'Whoops!',
-            'An unexpected error has occured.\n'
-            'The exception will be reported so the developers can look into it.\n\n'
-            'Need help? Contact us with this ID so we can help you out:\n' +
-            CONFIG.get('user_id', '<not found>')
-        )
-
-        sentry_sdk.capture_exception()
-
-        return
-
-    print()
-    print(
-        '+-------------------------------------------------------+\n'
-        'RiiTag-RPC failed to start :/ \n\n'
-        'Please contact us with this ID so we can help you out:\n' +
-        CONFIG.get('user_id', '<not found>') + '\n' +
-        '+-------------------------------------------------------+'
-    )
-    print()
-
-    sys.__excepthook__(exc_type, exc_value, exc_traceback)
-
-
-def on_thread_error(args):
-    on_error(args.exc_type, args.exc_value, args.exc_traceback)
-
-
-sys.excepthook = on_error
-threading.excepthook = on_thread_error
+# def on_error(exc_type, exc_value, exc_traceback):
+#     app: RiiTagApplication = get_app()
+#     if app:
+#         sys.__excepthook__(exc_type, exc_value, exc_traceback)
+#         # app.invalidate()
+#         #
+#         # app.show_message(
+#         #     'Whoops!',
+#         #     'An unexpected error has occured.\n'
+#         #     'The exception will be reported so the developers can look into it.\n\n'
+#         #     'Need help? Contact us with this ID so we can help you out:\n' +
+#         #     CONFIG.get('user_id', '<not found>')
+#         # )
+#         #
+#         # return
+#
+#     print()
+#     print(
+#         '+-------------------------------------------------------+\n'
+#         'RiiTag-RPC failed to start :/ \n\n'
+#         'Please contact us with this ID so we can help you out:\n' +
+#         CONFIG.get('user_id', '<not found>') + '\n' +
+#         '+-------------------------------------------------------+'
+#     )
+#     print()
+#
+#     sys.__excepthook__(exc_type, exc_value, exc_traceback)
+#
+#
+# def on_thread_error(args):
+#     on_error(args.exc_type, args.exc_value, args.exc_traceback)
+#
+#
+# sys.excepthook = on_error
+# threading.excepthook = on_thread_error
 
 
 def is_bundled():
