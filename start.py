@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import uuid
 
 import nest_asyncio
 import sentry_sdk
@@ -30,6 +31,12 @@ def resource_path(relative_path):
 try:
     with open(resource_path('config.json'), 'r') as file:
         CONFIG: dict = json.load(file)
+
+    if not CONFIG.get('user_id'):
+        with open(resource_path('config.json'), 'w') as file:
+            CONFIG['user_id'] = str(uuid.uuid4())
+
+            json.dump(CONFIG, file, indent=4)
 except FileNotFoundError:
     print('[!] The config file seems to be missing.')
     print('[!] Please re-download this program or create it manually.')
