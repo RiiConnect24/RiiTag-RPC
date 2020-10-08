@@ -20,10 +20,14 @@ from riitag import oauth2, user, watcher, presence, preferences
 nest_asyncio.apply()
 
 
+def is_bundled():
+    return getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')
+
+
 # Get resource when frozen with PyInstaller
-# noinspection PyProtectedMember
+# noinspection PyProtectedMember,PyUnresolvedReferences
 def resource_path(relative_path):
-    if hasattr(sys, '_MEIPASS'):
+    if is_bundled():
         return os.path.join(sys._MEIPASS, relative_path)
     return os.path.join(os.path.abspath("."), relative_path)
 
@@ -49,6 +53,9 @@ sentry_sdk.init(
     traces_sample_rate=1.0,
     release=f'riitag-rpc@{VERSION}'
 )
+with sentry_sdk.configure_scope() as scope:
+    scope.set_user(CONFIG.get('user_id', ''))
+    scope.set_tag('bundled', is_bundled())
 
 if not os.path.isdir('cache'):
     os.mkdir('cache/')
