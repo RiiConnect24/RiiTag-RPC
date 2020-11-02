@@ -1,9 +1,10 @@
 import json
 import os
-import sentry_sdk
 import sys
+import uuid
 
 import nest_asyncio
+import sentry_sdk
 from prompt_toolkit.application import Application
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.layout import Layout, DynamicContainer, FloatContainer, \
@@ -16,17 +17,54 @@ from prompt_toolkit.widgets import Frame
 import menus
 from riitag import oauth2, user, watcher, presence, preferences
 
-sentry_sdk.init(
-    "https://0206915cd7604929997a753583292296@o107347.ingest.sentry.io/5450405",
-    traces_sample_rate=1.0
-)
-
 nest_asyncio.apply()
 
 
+# def on_error(exc_type, exc_value, exc_traceback):
+#     app: RiiTagApplication = get_app()
+#     if app:
+#         sys.__excepthook__(exc_type, exc_value, exc_traceback)
+#         # app.invalidate()
+#         #
+#         # app.show_message(
+#         #     'Whoops!',
+#         #     'An unexpected error has occured.\n'
+#         #     'The exception will be reported so the developers can look into it.\n\n'
+#         #     'Need help? Contact us with this ID so we can help you out:\n' +
+#         #     CONFIG.get('user_id', '<not found>')
+#         # )
+#         #
+#         # return
+#
+#     print()
+#     print(
+#         '+-------------------------------------------------------+\n'
+#         'RiiTag-RPC failed to start :/ \n\n'
+#         'Please contact us with this ID so we can help you out:\n' +
+#         CONFIG.get('user_id', '<not found>') + '\n' +
+#         '+-------------------------------------------------------+'
+#     )
+#     print()
+#
+#     sys.__excepthook__(exc_type, exc_value, exc_traceback)
+#
+#
+# def on_thread_error(args):
+#     on_error(args.exc_type, args.exc_value, args.exc_traceback)
+#
+#
+# sys.excepthook = on_error
+# threading.excepthook = on_thread_error
+
+
+def is_bundled():
+    return getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')
+
+
 # Get resource when frozen with PyInstaller
+# noinspection PyProtectedMember,PyUnresolvedReferences
 def resource_path(relative_path):
-    if hasattr(sys, '_MEIPASS'):
+    if is_bundled():
         return os.path.join(sys._MEIPASS, relative_path)
     return os.path.join(os.path.abspath("."), relative_path)
 
@@ -34,11 +72,28 @@ def resource_path(relative_path):
 try:
     with open(resource_path('config.json'), 'r') as file:
         CONFIG: dict = json.load(file)
+
+    if not CONFIG.get('user_id'):
+        with open(resource_path('config.json'), 'w') as file:
+            CONFIG['user_id'] = str(uuid.uuid4())
+
+            json.dump(CONFIG, file, indent=2)
 except FileNotFoundError:
     print('[!] The config file seems to be missing.')
     print('[!] Please re-download this program or create it manually.')
 
     sys.exit(1)
+
+VERSION = CONFIG.get('version', '<unknown_version>')
+sentry_sdk.init(
+    "https://0206915cd7604929997a753583292296@o107347.ingest.sentry.io/5450405",
+    traces_sample_rate=1.0,
+    release=f'riitag-rpc@{VERSION}'
+)
+with sentry_sdk.configure_scope() as scope:
+    # noinspection PyDunderSlots,PyUnresolvedReferences
+    scope.user = {'id': CONFIG.get('user_id', '')}
+    scope.set_tag('bundled', is_bundled())
 
 if not os.path.isdir('cache'):
     os.mkdir('cache/')
@@ -104,9 +159,7 @@ class RiiTagApplication(Application):
 
     @property
     def version_string(self):
-        version = CONFIG.get('version', '<unknown version>')
-
-        return f'RiiTag-RPC v{version}'
+        return f'RiiTag-RPC v{VERSION}'
 
     @property
     def header_string(self):

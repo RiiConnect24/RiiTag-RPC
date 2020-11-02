@@ -73,7 +73,7 @@ class RiitagWatcher(Thread):
 
             if self._last_riitag:
                 last_play_time = self._last_riitag.last_played.time
-                if now - last_play_time >= timedelta(minutes=self.presence_timeout):
+                if not last_play_time or now - last_play_time >= timedelta(minutes=self.presence_timeout):
                     new_riitag.outdated = True
 
             if new_riitag != self._last_riitag:
