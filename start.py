@@ -91,7 +91,8 @@ sentry_sdk.init(
     release=f'riitag-rpc@{VERSION}'
 )
 with sentry_sdk.configure_scope() as scope:
-    scope.set_user(CONFIG.get('user_id', ''))
+    # noinspection PyDunderSlots,PyUnresolvedReferences
+    scope.user = {'id': CONFIG.get('user_id', '')}
     scope.set_tag('bundled', is_bundled())
 
 if not os.path.isdir('cache'):

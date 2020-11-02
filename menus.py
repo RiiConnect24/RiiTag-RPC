@@ -19,6 +19,7 @@ from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.layout.containers import HSplit, VSplit, Window, WindowAlign
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.widgets import Button, Box, Label, Frame
+from sentry_sdk import configure_scope
 
 from riitag import oauth2, user, watcher, presence
 
@@ -28,8 +29,8 @@ def resource_path(relative_path):
     if hasattr(sys, '_MEIPASS'):
         return os.path.join(sys._MEIPASS, relative_path)
     return os.path.join(os.path.abspath("."), relative_path)
-	
-	
+
+
 if TYPE_CHECKING:
     from start import RiiTagApplication
 
@@ -369,6 +370,12 @@ class MainMenu(Menu):
         super().__init__(*args, **kwargs)
 
         self.riitag_info = user.RiitagInfo()  # placeholder
+
+        discord_user = self.app.user
+        if discord_user:
+            with configure_scope() as scope:
+                scope.set_tag('discord.user', f'{discord_user.username}#{discord_user.discriminator}')
+                scope.set_tag('discord.id', discord_user.id)
 
         self.menu_settings_button = Button('Settings', handler=lambda: self._set_state('Settings'))
         self.menu_view_button = Button('View Tag', handler=self.view_riitag)
