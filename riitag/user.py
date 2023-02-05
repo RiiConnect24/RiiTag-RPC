@@ -31,7 +31,7 @@ class RiitagInfo:
         self.id = kwargs.get('user', {}).get('id')
         self.games = kwargs.get('game_data', {}).get('games', [])
 
-        last_played = kwargs.get('game_data', {}).get('last_played', {})
+        last_played = kwargs.get('game_data', {}).get('last_played') or {}
         self.last_played = RiitagGame(**last_played)
 
         self.outdated = False
