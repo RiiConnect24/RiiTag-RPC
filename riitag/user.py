@@ -87,6 +87,8 @@ class RiitagTitleResolver:
 
 
 class RiitagTitle:
+    COVER_URL = 'https://discord.dolphin-emu.org/cover-art/US/{game_id}.png'
+
     def __init__(self, resolver: RiitagTitleResolver, console: str, game_id: str):
         self._resolver = resolver
 
@@ -96,6 +98,10 @@ class RiitagTitle:
     @property
     def name(self):
         return self._resolver.get_game_name(self.console, self.game_id)
+
+    @property
+    def cover_url(self):
+        return self.COVER_URL.format(game_id=self.game_id)
 
 
 class User:
