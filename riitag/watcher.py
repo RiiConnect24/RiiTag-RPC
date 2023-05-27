@@ -61,6 +61,8 @@ class RiitagWatcher(Thread):
         return riitag
 
     def run(self):
+        self._last_riitag = self._get_riitag()
+
         while self._run:
             new_riitag = self._last_riitag
 
