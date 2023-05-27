@@ -2,7 +2,9 @@ import calendar
 
 import pypresence
 
-from .user import RiitagInfo, RiitagTitle
+from .user import RiitagInfo, RiitagTitleResolver
+
+resolver = RiitagTitleResolver()
 
 
 def format_presence(riitag_info: RiitagInfo):
@@ -12,7 +14,8 @@ def format_presence(riitag_info: RiitagInfo):
 
     start_timestamp = calendar.timegm(last_played.time.utctimetuple())
 
-    title = RiitagTitle(last_played.game_id)
+    resolver.update()
+    title = resolver.resolve(last_played.console, last_played.game_id)
 
     return {
         'details': f'Playing {title.name}!',

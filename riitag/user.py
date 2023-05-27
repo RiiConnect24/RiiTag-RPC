@@ -1,13 +1,11 @@
 import datetime
-from os import path
 
 import requests
 
 from .exceptions import RiitagNotFoundError
 
 RIITAG_ENDPOINT = 'http://tag.rc24.xyz/{}/json'
-TITLES_URL = 'https://www.gametdb.com/wiitdb.txt?LANG=EN'
-HEADERS = {'User-Agent': 'RiiTag-RPC WatchThread v1'}
+HEADERS = {'User-Agent': 'RiiTag-RPC WatchThread v2'}
 
 
 class RiitagGame:
@@ -46,37 +44,58 @@ class RiitagInfo:
         return self.last_played == other.last_played and self.outdated == other.outdated
 
 
-class RiitagTitle:
-    def __init__(self, game_id):
-        self.game_id: str = game_id
-        self.titles = {}
+class RiitagTitleResolver:
+    WII_TITLES_URL = 'https://www.gametdb.com/wiitdb.txt?LANG=EN'
+    WIIU_TITLES_URL = 'https://www.gametdb.com/wiiutdb.txt?LANG=EN'
 
-        self.download_titles()
-        self.load_titles()
+    def __init__(self):
+        self.game_ids: dict[(str, str), str] = {}
+
+    def update(self):
+        wii_db = self._get_data(self.WII_TITLES_URL)
+        for game_id, name in wii_db.items():
+            self.game_ids[('wii', game_id)] = name
+
+        wiiu_db = self._get_data(self.WIIU_TITLES_URL)
+        for game_id, name in wiiu_db.items():
+            self.game_ids[('wiiu', game_id)] = name
+
+    def get_game_name(self, console: str, game_id: str):
+        return self.game_ids.get((console.lower(), game_id.upper()), 'Unknown')
+
+    def resolve(self, console: str, game_id: str):
+        return RiitagTitle(self, console, game_id)
+
+    def _get_data(self, url: str):
+        try:
+            r = requests.get(url, headers=HEADERS)
+            r.raise_for_status()
+
+            return self._parse_db(r.text)
+        except requests.RequestException:
+            return {}
+
+    def _parse_db(self, db: str):
+        res = {}
+        for line in db.splitlines():
+            game_id, title = line.split(' = ')
+            if game_id == 'TITLES':
+                continue
+
+            res[game_id] = title
+        return res
+
+
+class RiitagTitle:
+    def __init__(self, resolver: RiitagTitleResolver, console: str, game_id: str):
+        self._resolver = resolver
+
+        self.game_id = game_id
+        self.console = console
 
     @property
     def name(self):
-        return self.titles.get(self.game_id) or self.game_id
-
-    def download_titles(self):
-        if not path.exists("cache/titles.txt"):
-            f = open("cache/titles.txt", "w", encoding='utf8')
-            f.write(requests.get(TITLES_URL, headers=HEADERS).text.encode('utf8').decode('ascii', 'ignore'))
-            f.close()
-
-    def load_titles(self):
-        f = open("cache/titles.txt", "r")
-
-        self.titles = {}
-
-        for line in f.readlines():
-            if " = " in line:
-                game_id = line.split(" = ")[0]
-                game_name = line.split(" = ")[1]
-
-                self.titles[game_id] = game_name
-
-        return self.titles
+        return self._resolver.get_game_name(self.console, self.game_id)
 
 
 class User:
