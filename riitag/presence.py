@@ -28,9 +28,9 @@ def format_presence(riitag_info: RiitagInfo):
         'small_image': 'logo',
         'small_text': 'tag.rc24.xyz',
 
-        'party_id': 'joinmypartyplsss',
-        'join': 'hahajoinsecretgobrrrr',
-        'match': 'vroomvroom'
+        'buttons': [
+            {'label': 'View RiiTag', 'url': f'https://tag.rc24.xyz/user/{riitag_info.id}'}
+        ]
     }
 
 
