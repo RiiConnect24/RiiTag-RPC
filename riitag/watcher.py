@@ -72,6 +72,10 @@ class RiitagWatcher(Thread):
                 self._last_check = now
 
                 new_riitag = self._get_riitag()
+                if new_riitag is None:
+                    # some error while fetching, probably server issue
+                    time.sleep(5)
+                    continue
 
             if self._last_riitag:
                 last_play_time = self._last_riitag.last_played.time
