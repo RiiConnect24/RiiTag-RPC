@@ -52,7 +52,7 @@ class RiitagTitleResolver:
 
     def __init__(self):
         self.game_ids: dict[(str, str), str] = {}
-        self._last_update = datetime.datetime(year=0, month=0, day=0)
+        self._last_update = datetime.datetime(year=1, month=1, day=1)
 
     def update_maybe(self):
         now = datetime.datetime.now()
