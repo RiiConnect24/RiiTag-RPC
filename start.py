@@ -33,7 +33,7 @@ def on_error(exc_type, exc_value, exc_traceback):
             'An unexpected error has occured.\n'
             'The exception will be reported so the developers can look into it.\n\n'
             'Need help? Contact us with this ID so we can help you out:\n' +
-            CONFIG.get('user_id', '<not found>') + '\n\n' +
+            (get_user_id() or '<not found>') + '\n\n' +
             'Reported exception:\n' +
             f'{exc_type.__name__} - {exc_value or "<no except value>"}'
         )
@@ -44,7 +44,7 @@ def on_error(exc_type, exc_value, exc_traceback):
         '+-------------------------------------------------------+\n'
         'RiiTag-RPC failed to start :/ \n\n'
         'Please contact us with this ID so we can help you out:\n' +
-        CONFIG.get('user_id', '<not found>') + '\n' +
+        (get_user_id() or '<not found>') + '\n' +
         '+-------------------------------------------------------+'
     )
     print()
@@ -64,6 +64,17 @@ def on_thread_error(args):
 sys.excepthook = on_error
 threading.excepthook = on_thread_error
 
+try:
+    os.makedirs('cache/', exist_ok=True)
+except OSError:
+    print('ERROR: Could not create cache directory.')
+    print('Please check file permissions and try again.')
+    print('Do NOT save this program in a system directory!')
+    print()
+    print('Press enter to exit.')
+    input()
+    sys.exit(1)
+
 
 def is_bundled():
     return getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')
@@ -77,15 +88,20 @@ def resource_path(relative_path):
     return os.path.join(os.path.abspath("."), relative_path)
 
 
+def get_user_id():
+    try:
+        with open(resource_path('cache/_uid'), 'r') as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        uid = str(uuid.uuid4())
+        with open(resource_path('cache/_uid'), 'w+') as f:
+            f.write(uid)
+        return uid
+
+
 try:
     with open(resource_path('config.json'), 'r') as file:
         CONFIG: dict = json.load(file)
-
-    if not CONFIG.get('user_id'):
-        with open(resource_path('config.json'), 'w') as file:
-            CONFIG['user_id'] = str(uuid.uuid4())
-
-            json.dump(CONFIG, file, indent=2)
 except FileNotFoundError:
     print('[!] The config file seems to be missing.')
     print('[!] Please re-download this program or create it manually.')
@@ -101,11 +117,8 @@ sentry_sdk.init(
 )
 with sentry_sdk.configure_scope() as scope:
     # noinspection PyDunderSlots,PyUnresolvedReferences
-    scope.user = {'id': CONFIG.get('user_id', '')}
+    scope.user = {'id': get_user_id()}
     scope.set_tag('bundled', is_bundled())
-
-if not os.path.isdir('cache'):
-    os.mkdir('cache/')
 
 
 class RiiTagApplication(Application):
