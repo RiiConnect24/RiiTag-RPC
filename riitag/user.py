@@ -92,11 +92,11 @@ class User:
 
     def fetch_riitag(self):
         url = RIITAG_ENDPOINT.format(self.id)
-        r = requests.get(url, headers=HEADERS)
 
         try:
+            r = requests.get(url, headers=HEADERS)
             r.raise_for_status()
-        except requests.exceptions.HTTPError:
+        except requests.exceptions.RequestException:
             self.riitag = None
 
             return
