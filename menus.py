@@ -230,6 +230,7 @@ class SplashScreen(Menu):
                               f'Please make sure your Discord client is running.'
             self.update()
 
+            time.sleep(4)
             self._connect_presence()
         else:
             self._login()
