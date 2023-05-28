@@ -48,8 +48,18 @@ class RiitagTitleResolver:
     WII_TITLES_URL = 'https://www.gametdb.com/wiitdb.txt?LANG=EN'
     WIIU_TITLES_URL = 'https://www.gametdb.com/wiiutdb.txt?LANG=EN'
 
+    UPDATE_EVERY = datetime.timedelta(days=1)
+
     def __init__(self):
         self.game_ids: dict[(str, str), str] = {}
+        self._last_update = datetime.datetime(year=0, month=0, day=0)
+
+    def update_maybe(self):
+        now = datetime.datetime.now()
+        if (now - self._last_update) >= self.UPDATE_EVERY:
+            self.update()
+            return True
+        return False
 
     def update(self):
         wii_db = self._get_data(self.WII_TITLES_URL)
@@ -60,10 +70,14 @@ class RiitagTitleResolver:
         for game_id, name in wiiu_db.items():
             self.game_ids[('wiiu', game_id)] = name
 
+        self._last_update = datetime.datetime.now()
+
     def get_game_name(self, console: str, game_id: str):
         return self.game_ids.get((console.lower(), game_id.upper()), 'Unknown')
 
     def resolve(self, console: str, game_id: str):
+        self.update_maybe()
+
         return RiitagTitle(self, console, game_id)
 
     def _get_data(self, url: str):

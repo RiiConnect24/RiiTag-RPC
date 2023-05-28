@@ -14,7 +14,6 @@ def format_presence(riitag_info: RiitagInfo):
 
     start_timestamp = calendar.timegm(last_played.time.utctimetuple())
 
-    resolver.update()
     title = resolver.resolve(last_played.console, last_played.game_id)
 
     return {
