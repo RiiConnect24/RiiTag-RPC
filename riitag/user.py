@@ -101,7 +101,23 @@ class RiitagTitleResolver:
 
 
 class RiitagTitle:
-    COVER_URL = 'https://discord.dolphin-emu.org/cover-art/US/{game_id}.png'
+    COVER_URL = 'https://art.gametdb.com/{console}/{img_type}/US/{game_id}.{file_type}'
+    NOTFOUND_URL = 'https://discord.dolphin-emu.org/cover-art/unknown.png'
+    IMG_TYPES = (
+        'coverHQ',
+        'cover',
+        'cover3D',
+        'disc',
+        'discM'
+    )
+    FILE_TYPES = (
+        'png',
+        'jpg'
+    )
+    CONSOLE_NAMES = {
+        'wii': 'Wii',
+        'wiiu': 'Wii U'
+    }
 
     def __init__(self, resolver: RiitagTitleResolver, console: str, game_id: str):
         self._resolver = resolver
@@ -114,8 +130,28 @@ class RiitagTitle:
         return self._resolver.get_game_name(self.console, self.game_id)
 
     @property
-    def cover_url(self):
-        return self.COVER_URL.format(game_id=self.game_id)
+    def console_name(self):
+        console = self.console.lower()
+        return self.CONSOLE_NAMES.get(console, console)
+
+    def get_cover_url(self):
+        for img_type in self.IMG_TYPES:
+            for file_type in self.FILE_TYPES:
+                try:
+                    url = self.COVER_URL.format(
+                        console=self.console.lower(),
+                        img_type=img_type,
+                        game_id=self.game_id,
+                        file_type=file_type
+                    )
+                    r = requests.head(url)
+                except requests.RequestException:
+                    continue
+
+                if r.status_code == 200:
+                    return url
+
+        return self.NOTFOUND_URL
 
 
 class User:

@@ -18,10 +18,10 @@ def format_presence(riitag_info: RiitagInfo):
 
     return {
         'details': f'Playing {title.name}',
-        'state': f'Playing on {last_played.console.title()}',
+        'state': f'Playing on {title.console_name}',
         'start': start_timestamp,
 
-        'large_image': title.cover_url,
+        'large_image': title.get_cover_url(),
         'large_text': title.name,
 
         'small_image': 'logo',
