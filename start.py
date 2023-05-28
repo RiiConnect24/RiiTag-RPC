@@ -123,7 +123,7 @@ with sentry_sdk.configure_scope() as scope:
 
 class RiiTagApplication(Application):
     def __init__(self, *args, **kwargs):
-        self._current_menu: menus.Menu = None
+        self._current_menu: menus.Menu | None = None
         self._float_message_layout = None
 
         self.preferences = preferences.Preferences.load('cache/prefs.json')
@@ -139,10 +139,10 @@ class RiiTagApplication(Application):
                          layout=Layout(DynamicContainer(self._get_layout)),
                          full_screen=True)
 
-        self.token: oauth2.OAuth2Token = None
-        self.user: user.User = None
+        self.token: oauth2.OAuth2Token | None = None
+        self.user: user.User | None = None
 
-        self.riitag_watcher: watcher.RiitagWatcher = None
+        self.riitag_watcher: watcher.RiitagWatcher | None = None
 
         self.oauth_client.start_server(CONFIG.get('port', 4000))
 
