@@ -56,7 +56,7 @@ class RPCHandler:
     def connect(self):
         try:
             self._presence.connect()
-        except (ConnectionRefusedError, pypresence.InvalidPipe):
+        except (ConnectionRefusedError, pypresence.PyPresenceException):
             self._is_connected = False
             return False
         else:

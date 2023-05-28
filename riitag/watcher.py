@@ -4,6 +4,7 @@ from threading import Thread
 from typing import TYPE_CHECKING
 
 from prompt_toolkit.application import get_app
+from pypresence.exceptions import PyPresenceException
 
 from .exceptions import RiitagNotFoundError
 from .preferences import Preferences
@@ -61,6 +62,8 @@ class RiitagWatcher(Thread):
         return riitag
 
     def run(self):
+        self._last_riitag = self._get_riitag()
+
         while self._run:
             new_riitag = self._last_riitag
 
@@ -70,6 +73,10 @@ class RiitagWatcher(Thread):
                 self._last_check = now
 
                 new_riitag = self._get_riitag()
+                if new_riitag is None:
+                    # some error while fetching, probably server issue
+                    time.sleep(5)
+                    continue
 
             if self._last_riitag:
                 last_play_time = self._last_riitag.last_played.time
@@ -77,7 +84,12 @@ class RiitagWatcher(Thread):
                     new_riitag.outdated = True
 
             if new_riitag != self._last_riitag:
-                self._update_callback(new_riitag)
+                try:
+                    self._update_callback(new_riitag)
+                except PyPresenceException:
+                    # failed to set presence. We will retry later.
+                    time.sleep(5)
+                    continue
 
                 self._last_riitag = new_riitag
 
