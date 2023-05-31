@@ -2,7 +2,9 @@ import calendar
 
 import pypresence
 
-from .user import RiitagInfo, RiitagTitle
+from .user import RiitagInfo, RiitagTitleResolver
+
+resolver = RiitagTitleResolver()
 
 
 def format_presence(riitag_info: RiitagInfo):
@@ -12,22 +14,22 @@ def format_presence(riitag_info: RiitagInfo):
 
     start_timestamp = calendar.timegm(last_played.time.utctimetuple())
 
-    title = RiitagTitle(last_played.game_id)
+    title = resolver.resolve(last_played.console, last_played.game_id)
 
     return {
-        'details': f'Playing {title.name}!',
-        'state': f'https://gametdb.com/{last_played.console.title()}/{last_played.game_id}',
+        'details': f'Playing {title.name}',
+        'state': f'Playing on {title.console_name}',
         'start': start_timestamp,
 
-        'large_image': 'console_wii',
-        'large_text': f'Playing on {last_played.console.title()}',
+        'large_image': title.get_cover_url(),
+        'large_text': title.name,
 
         'small_image': 'logo',
         'small_text': 'tag.rc24.xyz',
 
-        'party_id': 'joinmypartyplsss',
-        'join': 'hahajoinsecretgobrrrr',
-        'match': 'vroomvroom'
+        'buttons': [
+            {'label': 'View RiiTag', 'url': f'https://tag.rc24.xyz/user/{riitag_info.id}'}
+        ]
     }
 
 
