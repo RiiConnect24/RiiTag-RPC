@@ -41,21 +41,20 @@ jobs:
           cpu_info: cpuinfo/raspberrypi_4b
           base_image: raspios_lite:latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Build Raspberry pi release
       uses: pguyot/arm-runner-action@v2
       with:
         base_image: ${{ matrix.base_image }}
         cpu: ${{ matrix.cpu }}
         cpu_info: ${{ matrix.cpu_info }}
+        bind_mount_repository: true
         commands: |
-          sudo apt-get update || true
+          sudo apt-get update
           sudo apt-get install -y python3-pip
           pip3 install -r requirements.txt
           pip3 install pyinstaller
           pyinstaller riitag-rpc.spec
-          ls -la
-          ls -la dist/
     - name: Publish Build Artifacts
       uses: actions/upload-artifact@master
       with:
