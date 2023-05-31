@@ -49,7 +49,7 @@ jobs:
         cpu: ${{ matrix.cpu }}
         cpu_info: ${{ matrix.cpu_info }}
         commands: |
-          sudo apt-get install -y python3-pip
+          sudo apt-get update && sudo apt-get install -y python3-pip
           pip install -r requirements.txt
           pip install pyinstaller
           pyinstaller riitag-rpc.spec
