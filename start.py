@@ -1,11 +1,13 @@
 import json
 import os
 import sys
+import threading
+import traceback
 import uuid
 
 import nest_asyncio
 import sentry_sdk
-from prompt_toolkit.application import Application
+from prompt_toolkit.application import Application, DummyApplication, get_app
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.layout import Layout, DynamicContainer, FloatContainer, \
     Float, FormattedTextControl
@@ -20,41 +22,58 @@ from riitag import oauth2, user, watcher, presence, preferences
 nest_asyncio.apply()
 
 
-# def on_error(exc_type, exc_value, exc_traceback):
-#     app: RiiTagApplication = get_app()
-#     if app:
-#         sys.__excepthook__(exc_type, exc_value, exc_traceback)
-#         # app.invalidate()
-#         #
-#         # app.show_message(
-#         #     'Whoops!',
-#         #     'An unexpected error has occured.\n'
-#         #     'The exception will be reported so the developers can look into it.\n\n'
-#         #     'Need help? Contact us with this ID so we can help you out:\n' +
-#         #     CONFIG.get('user_id', '<not found>')
-#         # )
-#         #
-#         # return
-#
-#     print()
-#     print(
-#         '+-------------------------------------------------------+\n'
-#         'RiiTag-RPC failed to start :/ \n\n'
-#         'Please contact us with this ID so we can help you out:\n' +
-#         CONFIG.get('user_id', '<not found>') + '\n' +
-#         '+-------------------------------------------------------+'
-#     )
-#     print()
-#
-#     sys.__excepthook__(exc_type, exc_value, exc_traceback)
-#
-#
-# def on_thread_error(args):
-#     on_error(args.exc_type, args.exc_value, args.exc_traceback)
-#
-#
-# sys.excepthook = on_error
-# threading.excepthook = on_thread_error
+def on_error(exc_type, exc_value, exc_traceback):
+    app: RiiTagApplication = get_app()
+    if not isinstance(app, DummyApplication):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        app.invalidate()
+
+        app.show_message(
+            'Whoops!',
+            'An unexpected error has occured.\n'
+            'The exception will be reported so the developers can look into it.\n\n'
+            'Need help? Contact us with this ID so we can help you out:\n' +
+            (get_user_id() or '<not found>') + '\n\n' +
+            'Reported exception:\n' +
+            f'{exc_type.__name__} - {exc_value or "<no except value>"}'
+        )
+        return
+
+    print()
+    print(
+        '+-------------------------------------------------------+\n'
+        'RiiTag-RPC failed to start :/ \n\n'
+        'Please contact us with this ID so we can help you out:\n' +
+        (get_user_id() or '<not found>') + '\n' +
+        '+-------------------------------------------------------+'
+    )
+    print()
+
+    print('** Original exception was: **')
+    traceback.print_exception(exc_value)
+    print()
+    print('** Press Enter to exit **')
+    input()
+    sys.exit(1)
+
+
+def on_thread_error(args):
+    on_error(args.exc_type, args.exc_value, args.exc_traceback)
+
+
+sys.excepthook = on_error
+threading.excepthook = on_thread_error
+
+try:
+    os.makedirs('cache/', exist_ok=True)
+except OSError:
+    print('ERROR: Could not create cache directory.')
+    print('Please check file permissions and try again.')
+    print('Do NOT save this program in a system directory!')
+    print()
+    print('Press enter to exit.')
+    input()
+    sys.exit(1)
 
 
 def is_bundled():
@@ -69,19 +88,25 @@ def resource_path(relative_path):
     return os.path.join(os.path.abspath("."), relative_path)
 
 
+def get_user_id():
+    try:
+        with open(resource_path('cache/_uid'), 'r') as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        uid = str(uuid.uuid4())
+        with open(resource_path('cache/_uid'), 'w+') as f:
+            f.write(uid)
+        return uid
+
+
 try:
     with open(resource_path('config.json'), 'r') as file:
         CONFIG: dict = json.load(file)
-
-    if not CONFIG.get('user_id'):
-        with open(resource_path('config.json'), 'w') as file:
-            CONFIG['user_id'] = str(uuid.uuid4())
-
-            json.dump(CONFIG, file, indent=2)
 except FileNotFoundError:
     print('[!] The config file seems to be missing.')
     print('[!] Please re-download this program or create it manually.')
 
+    input()
     sys.exit(1)
 
 VERSION = CONFIG.get('version', '<unknown_version>')
@@ -92,16 +117,13 @@ sentry_sdk.init(
 )
 with sentry_sdk.configure_scope() as scope:
     # noinspection PyDunderSlots,PyUnresolvedReferences
-    scope.user = {'id': CONFIG.get('user_id', '')}
+    scope.user = {'id': get_user_id()}
     scope.set_tag('bundled', is_bundled())
-
-if not os.path.isdir('cache'):
-    os.mkdir('cache/')
 
 
 class RiiTagApplication(Application):
     def __init__(self, *args, **kwargs):
-        self._current_menu: menus.Menu = None
+        self._current_menu: menus.Menu | None = None
         self._float_message_layout = None
 
         self.preferences = preferences.Preferences.load('cache/prefs.json')
@@ -117,10 +139,10 @@ class RiiTagApplication(Application):
                          layout=Layout(DynamicContainer(self._get_layout)),
                          full_screen=True)
 
-        self.token: oauth2.OAuth2Token = None
-        self.user: user.User = None
+        self.token: oauth2.OAuth2Token | None = None
+        self.user: user.User | None = None
 
-        self.riitag_watcher: watcher.RiitagWatcher = None
+        self.riitag_watcher: watcher.RiitagWatcher | None = None
 
         self.oauth_client.start_server(CONFIG.get('port', 4000))
 
