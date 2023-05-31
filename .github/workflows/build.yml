@@ -58,5 +58,5 @@ jobs:
     - name: Publish Build Artifacts
       uses: actions/upload-artifact@master
       with:
-        name: ${{ matrix.os }}
+        name: rpi-4b-latest
         path: dist
