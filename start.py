@@ -18,6 +18,7 @@ from prompt_toolkit.widgets import Frame
 
 import menus
 from riitag import oauth2, user, watcher, presence, preferences
+from riitag.util import get_cache
 
 nest_asyncio.apply()
 
@@ -65,11 +66,11 @@ sys.excepthook = on_error
 threading.excepthook = on_thread_error
 
 try:
-    os.makedirs('cache/', exist_ok=True)
+    # prepare cache dir early so we can spot errors sooner
+    get_cache('')
 except OSError:
     print('ERROR: Could not create cache directory.')
     print('Please check file permissions and try again.')
-    print('Do NOT save this program in a system directory!')
     print()
     print('Press enter to exit.')
     input()
@@ -90,12 +91,15 @@ def resource_path(relative_path):
 
 def get_user_id():
     try:
-        with open(resource_path('cache/_uid'), 'r') as f:
+        with open(get_cache('_uid'), 'r') as f:
             return f.read().strip()
     except FileNotFoundError:
         uid = str(uuid.uuid4())
-        with open(resource_path('cache/_uid'), 'w+') as f:
-            f.write(uid)
+        try:
+            with open(get_cache('_uid'), 'w+') as f:
+                f.write(uid)
+        except:
+            return None
         return uid
 
 
@@ -126,7 +130,7 @@ class RiiTagApplication(Application):
         self._current_menu: menus.Menu | None = None
         self._float_message_layout = None
 
-        self.preferences = preferences.Preferences.load('cache/prefs.json')
+        self.preferences = preferences.Preferences.load(get_cache('prefs.json'))
         self.oauth_client = oauth2.OAuth2Client(CONFIG.get('oauth2'))
         self.rpc_handler = presence.RPCHandler(
             CONFIG.get('rpc', {}).get('client_id')

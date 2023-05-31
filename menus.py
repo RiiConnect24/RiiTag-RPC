@@ -22,6 +22,7 @@ from prompt_toolkit.widgets import Button, Box, Label, Frame
 from sentry_sdk import configure_scope
 
 from riitag import oauth2, user, watcher, presence
+from riitag.util import get_cache
 
 
 # Get resource when frozen with PyInstaller
@@ -194,12 +195,12 @@ class SplashScreen(Menu):
 
     @property
     def is_token_cached(self):
-        return os.path.isfile('cache/token.json')
+        return os.path.isfile(get_cache('token.json'))
 
     def _refresh_token(self, token):
         try:
             token.refresh()
-            token.save('cache/token.json')
+            token.save(get_cache('token.json'))
 
             self.app.token = token
             self.app.user = token.get_user()
@@ -237,7 +238,7 @@ class SplashScreen(Menu):
 
     def _login(self):
         if self.is_token_cached:
-            with open('cache/token.json', 'r') as file:
+            with open(get_cache('token.json'), 'r') as file:
                 token_data = json.load(file)
             try:
                 token = oauth2.OAuth2Token(self.app.oauth_client, **token_data)
@@ -273,7 +274,7 @@ class SetupMenu(Menu):
 
         self.state = 'setup_start'
 
-        if not os.path.isfile('cache/token.json'):  # new user
+        if not os.path.isfile(get_cache('token.json')):  # new user
             self.setup_start_layout = Window(FormattedTextControl(HTML(
                 '\n\n\n<b>Hello!</b> It looks like this is your first time using this program.\n'
                 'No worries! Let\'s get your Discord account linked up first.\n\n\n'
@@ -344,7 +345,7 @@ class SetupMenu(Menu):
         self.update()
 
         token = self.app.oauth_client.get_token(code)
-        token.save('cache/token.json')
+        token.save(get_cache('token.json'))
         self.app.token = token
 
         self.app.user = token.get_user()
@@ -509,7 +510,7 @@ class MainMenu(Menu):
 
     def _logout_callback(self, confirm):
         if confirm:
-            os.remove('cache/token.json')
+            os.remove(get_cache('token.json'))
             self.app.exit()
 
     def _logout(self):
@@ -545,13 +546,13 @@ class MainMenu(Menu):
             is_modified = True
             self.app.preferences.presence_timeout = self.settings_pres_timeout_button.value
 
-        self.app.preferences.save('cache/prefs.json')
+        self.app.preferences.save(get_cache('prefs.json'))
 
         return is_modified
 
     def _reset_preferences(self):
         self.app.preferences.reset()
-        self.app.preferences.save('cache/prefs.json')
+        self.app.preferences.save(get_cache('prefs.json'))
 
         self.settings_pres_timeout_button.value = self.app.preferences.presence_timeout
         self.settings_pres_timeout_button.update()
