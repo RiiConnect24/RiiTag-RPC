@@ -49,8 +49,11 @@ jobs:
         cpu: ${{ matrix.cpu }}
         cpu_info: ${{ matrix.cpu_info }}
         commands: |
-          python3 --version
+          pip3 install -r requirements.txt
+          pip3 install pyinstaller
+          pyinstaller riitag-rpc.spec
           ls -la
+          ls -la dist/
     - name: Publish Build Artifacts
       uses: actions/upload-artifact@master
       with:
