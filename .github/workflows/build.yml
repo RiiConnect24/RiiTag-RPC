@@ -49,8 +49,8 @@ jobs:
         cpu: ${{ matrix.cpu }}
         cpu_info: ${{ matrix.cpu_info }}
         commands: |
-          pip3 install -r requirements.txt
-          pip3 install pyinstaller
+          pip install -r requirements.txt
+          pip install pyinstaller
           pyinstaller riitag-rpc.spec
           ls -la
           ls -la dist/
