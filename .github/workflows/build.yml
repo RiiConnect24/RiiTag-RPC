@@ -39,7 +39,7 @@ jobs:
         - target: rpi_4b_aarch64
           cpu: cortex-a53
           cpu_info: cpuinfo/raspberrypi_4b
-          base_image: raspios_lite:latest
+          base_image: raspios_lite_arm64:latest
     steps:
     - uses: actions/checkout@v3
     - name: Build Raspberry pi release
