@@ -5,11 +5,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  Build:
+  Build-PC:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macOS-latest]
+        os: [windows-2022, ubuntu-22.04, ubuntu-20.04, macos-12]
 
     steps:
     - name: Obtain latest version of the repository
@@ -27,5 +27,36 @@ jobs:
     - name: Publish Build Artifacts
       uses: actions/upload-artifact@master
       with:
-        name: ${{ matrix.os }}
+        name: ${{ matrix.os }}-x64
+        path: dist
+  
+  Build-RPI:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        target: [rpi_4b_aarch64]
+        include:
+        - target: rpi_4b_aarch64
+          cpu: cortex-a53
+          cpu_info: cpuinfo/raspberrypi_4b
+          base_image: raspios_lite_arm64:latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build Raspberry pi release
+      uses: pguyot/arm-runner-action@v2
+      with:
+        base_image: ${{ matrix.base_image }}
+        cpu: ${{ matrix.cpu }}
+        cpu_info: ${{ matrix.cpu_info }}
+        bind_mount_repository: true
+        commands: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip
+          pip3 install -r requirements.txt
+          pip3 install pyinstaller
+          pyinstaller riitag-rpc.spec
+    - name: Publish Build Artifacts
+      uses: actions/upload-artifact@master
+      with:
+        name: rpi-4b-aarch64
         path: dist
