@@ -129,7 +129,7 @@ class Menu(metaclass=abc.ABCMeta):
 
         if self.app.riitag_watcher:
             self.app.riitag_watcher.stop()
-            self.app.riitag_watcher.join()
+            self.app.riitag_watcher.join(timeout=5)
 
         self.app.exit()
 
