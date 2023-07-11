@@ -37,6 +37,8 @@ class RPCHandler:
     def __init__(self, client_id, on_error=None):
         self._presence = pypresence.Presence(
             client_id=client_id,
+            response_timeout=5,
+            connection_timeout=5,
             handler=None
         )
 
