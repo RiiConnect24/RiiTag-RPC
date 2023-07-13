@@ -68,7 +68,12 @@ class RPCHandler:
             return True
 
     def clear(self):
-        self._presence.clear()
+        try:
+            self._presence.clear()
+        except pypresence.ResponseTimeout:
+            # clear can timeout when using arRPC
+            # see: https://github.com/RiiConnect24/RiiTag-RPC/issues/29
+            pass
 
     def set_presence(self, **options):
         self._presence.update(**options)

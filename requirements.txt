@@ -1,5 +1,5 @@
 requests~=2.31.0
-prompt_toolkit~=3.0.38
-pypresence~=4.2.1
+prompt_toolkit~=3.0.39
+pypresence~=4.3.0
 nest_asyncio~=1.5.6
-sentry_sdk~=1.25.1
+sentry_sdk~=1.28.1
