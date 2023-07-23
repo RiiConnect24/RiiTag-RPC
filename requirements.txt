@@ -1,3 +1,4 @@
+charset_normalizer<3.0
 requests~=2.31.0
 prompt_toolkit~=3.0.39
 pypresence~=4.3.0
