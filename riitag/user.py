@@ -117,6 +117,7 @@ class RiitagTitle:
     REGION = (
         'EN',
         'US'
+        'JA'
     )
     FILE_TYPES = (
         'png',
