@@ -101,7 +101,7 @@ class RiitagTitleResolver:
 
 
 class RiitagTitle:
-    COVER_URL = 'https://art.gametdb.com/{console}/{img_type}/US/{game_id}.{file_type}'
+    COVER_URL = 'https://art.gametdb.com/{console}/{img_type}/{region}/{game_id}.{file_type}'
     NOTFOUND_URL = 'https://discord.dolphin-emu.org/cover-art/unknown.png'
     IMG_TYPES = (
         'coverHQ',
@@ -110,15 +110,19 @@ class RiitagTitle:
         'disc',
         'discM'
     )
+    CONSOLE_NAMES = {
+        'wii': 'Wii',
+        'wiiu': 'Wii U',
+    }
+    REGION = (
+        'EN',
+        'US'
+        'JA'
+    )
     FILE_TYPES = (
         'png',
         'jpg'
     )
-    CONSOLE_NAMES = {
-        'wii': 'Wii',
-        'wiiu': 'Wii U'
-    }
-
     def __init__(self, resolver: RiitagTitleResolver, console: str, game_id: str):
         self._resolver = resolver
 
@@ -136,20 +140,22 @@ class RiitagTitle:
 
     def get_cover_url(self):
         for img_type in self.IMG_TYPES:
-            for file_type in self.FILE_TYPES:
-                try:
-                    url = self.COVER_URL.format(
-                        console=self.console.lower(),
-                        img_type=img_type,
-                        game_id=self.game_id,
-                        file_type=file_type
-                    )
-                    r = requests.head(url)
-                except requests.RequestException:
-                    continue
+            for region in self.REGION:
+                for file_type in self.FILE_TYPES:
+                    try:
+                        url = self.COVER_URL.format(
+                            console=self.console.lower(),
+                            img_type=img_type,
+                            game_id=self.game_id,
+                            file_type=file_type,
+                            region=region
+                        )
+                        r = requests.head(url)
+                    except requests.RequestException:
+                        continue
 
-                if r.status_code == 200:
-                    return url
+                    if r.status_code == 200:
+                        return url
 
         return self.NOTFOUND_URL
 
