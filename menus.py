@@ -389,7 +389,7 @@ class MainMenu(Menu):
         self.settings_pres_timeout_button = PreferenceButton(
             value=self.app.preferences.presence_timeout,
             increments=10,
-            limits=(10, 120)
+            limits=(10, 12 * 60)
         )
         self.settings_check_interval_button = PreferenceButton(
             value=self.app.preferences.check_interval,
