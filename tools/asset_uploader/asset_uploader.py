@@ -40,9 +40,7 @@ class RiitagGame:
     @property
     def region(self):
         region_char = self.game_id[3]
-        if region_char == "P":
-            return "EN"
-        elif region_char == "E":
+        if region_char == "E":
             return "US"
         elif region_char == "J":
             return "JA"
@@ -58,28 +56,15 @@ class RiitagGame:
         code = self.game_id[0]
 
         # not complete, needs support for console prefixes.
-        if code in ["R", "S"]:
-            return "wii"
-        elif code in ["A", "B"]:
-            return "wiiu"
-        else:
-            return "wii"
+        return "wii" if code in ["R", "S"] or code not in ["A", "B"] else "wiiu"
 
     @property
     def cover_type(self):
-        if self.console in ["ds", "3ds"]:
-            return "box"
-        else:
-            return "cover3D"
+        return "box" if self.console in ["ds", "3ds"] else "cover3D"
 
     @property
     def img_extension(self):
-        if self.console == "wii":
-            return "png"
-        elif self.console != "wii" and self.cover_type == "cover":
-            return "jpg"
-        else:
-            return "png"
+        return "png" if self.console == "wii" or self.cover_type != "cover" else "jpg"
 
     @property
     def cover_url(self):
@@ -99,10 +84,7 @@ class DiscordAsset:
         self.name = name
 
     def __eq__(self, other):
-        if not isinstance(other, DiscordAsset):
-            return False
-
-        return self.name == other.name
+        return self.name == other.name if isinstance(other, DiscordAsset) else False
 
     def remove(self):
         headers = {
@@ -120,12 +102,7 @@ class DiscordAsset:
 
 def download_cover(game: RiitagGame):
     r = requests.get(game.cover_url)
-    if r.status_code != 200:
-        return None
-
-    file = BytesIO(r.content)
-
-    return file
+    return None if r.status_code != 200 else BytesIO(r.content)
 
 
 def upload_asset(file, name):
@@ -143,9 +120,7 @@ def upload_asset(file, name):
     r = requests.post(ASSET_UPLOAD_URL, headers=headers, json=payload)
     r.raise_for_status()
 
-    asset = DiscordAsset(**r.json())
-
-    return asset
+    return DiscordAsset(**r.json())
 
 
 def get_assets():
@@ -157,15 +132,13 @@ def get_assets():
     r = requests.get(ASSET_UPLOAD_URL, headers=headers)
     r.raise_for_status()
 
-    assets = [DiscordAsset(**data) for data in r.json()]
-
-    return assets
+    return [DiscordAsset(**data) for data in r.json()]
 
 
 def parse_rankings(fp, max_results):
     games = []
     with open(fp) as file:
-        for line in file.readlines():
+        for line in file:
             count, game_id = line.split()
             game = RiitagGame(
                 play_count=int(count),
@@ -207,8 +180,9 @@ def main():
                 cover.seek(0)
 
         if AUTO_UPLOAD:
-            existing_assets = [asset for asset in app_assets if asset.name == asset_name]
-            if existing_assets:
+            if existing_assets := [
+                asset for asset in app_assets if asset.name == asset_name
+            ]:
                 for num, asset in enumerate(existing_assets):
                     print(f"({n + 1}/{DOWNLOAD_COUNT}) Removing dupe asset {num}/{len(existing_assets)}...",
                           end="\r", flush=True)
@@ -225,14 +199,14 @@ def main():
                 failed_games.append(game)
                 status = "FAILED"
 
-                print("ERROR: " + e.response.text)
+                print(f"ERROR: {e.response.text}")
 
         print(f"({n + 1}/{DOWNLOAD_COUNT}) {game.game_id} finished ({status})")
 
     print()
     print(f"A total of {len(games) - len(failed_games)} assets have been processed.")
     if failed_games:
-        print(f"These games failed to upload and may require manual intervention:")
+        print("These games failed to upload and may require manual intervention:")
         for game in failed_games:
             print(f"=> {game.game_id} - {game.cover_url}")
 

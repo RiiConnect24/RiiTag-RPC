@@ -183,8 +183,7 @@ class User:
             return
 
         data = r.json()
-        error = data.get('error')
-        if error:
+        if error := data.get('error'):
             raise RiitagNotFoundError(error)
 
         riitag = RiitagInfo(**data)

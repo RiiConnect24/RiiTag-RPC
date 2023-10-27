@@ -373,8 +373,7 @@ class MainMenu(Menu):
 
         self.riitag_info = user.RiitagInfo()  # placeholder
 
-        discord_user = self.app.user
-        if discord_user:
+        if discord_user := self.app.user:
             with configure_scope() as scope:
                 scope.set_tag('discord.user', f'{discord_user.username}#{discord_user.discriminator}')
                 scope.set_tag('discord.id', discord_user.id)
@@ -585,7 +584,7 @@ class MainMenu(Menu):
 
     def view_riitag(self):
         client_id = self.app.user.id
-        tag_url = "https://tag.rc24.xyz/" + client_id
+        tag_url = f"https://tag.rc24.xyz/{client_id}"
         try:
             webbrowser.open(tag_url)
         except webbrowser.Error:
