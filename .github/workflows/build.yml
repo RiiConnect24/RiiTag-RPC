@@ -74,31 +74,51 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: ubuntu-22.04-x64
-          path: RiiTag-RPC_Ubuntu22
+          path: ubuntu22
 
       - name: Download ubuntu-20.04-x64
         uses: actions/download-artifact@v3
         with:
           name: ubuntu-20.04-x64
-          path: RiiTag-RPC_Ubuntu20
+          path: ubuntu20
 
       - name: Download macos-12-x64
         uses: actions/download-artifact@v3
         with:
           name: macos-12-x64
-          path: RiiTag-RPC_MacOS
+          path: macos
 
       - name: Download windows-2022-x64
         uses: actions/download-artifact@v3
         with:
           name: windows-2022-x64
-          path: RiiTag-RPC_Windows
+          path: windows
 
       - name: Download rpi-4b-aarch64
         uses: actions/download-artifact@v3
         with:
           name: rpi-4b-aarch64
-          path: RiiTag-RPC_Rpi4B
+          path: rpi4b
       
-      - name: Display structure of downloaded files
-        run: ls -R
+      - name: Collect artifacts
+        run: |
+          mkdir -p releases
+          mv ubuntu22/riitag-rpc releases/RiiTag-RPC_Ubuntu22
+          mv ubuntu20/riitag-rpc releases/RiiTag-RPC_Ubuntu20
+          mv    macos/riitag-rpc releases/RiiTag-RPC_MacOS
+          mv  windows/riitag-rpc releases/RiiTag-RPC_Windows
+          mv    rpi4b/riitag-rpc releases/RiiTag-RPC_Rpi4B
+          tar -cvf all-artifacts.tar.bz2 releases/
+
+      - name: Upload collected artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: all-artifacts
+          path: all-artifacts.tar.bz2
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: true
+          files: releases/*
