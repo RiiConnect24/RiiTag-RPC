@@ -19,9 +19,9 @@ jobs:
       with:
         python-version: '3.11'
     - name: Install requirements with PIP
-      run: pip install -r requirements.txt
+      run: pip install --break-system-packages -r requirements.txt
     - name: Install pyinstaller
-      run: pip install pyinstaller
+      run: pip install --break-system-packages pyinstaller
     - name: Build RiiTag RPC
       run: pyinstaller riitag-rpc.spec
     - name: Publish Build Artifacts
@@ -52,8 +52,8 @@ jobs:
         commands: |
           sudo apt-get update
           sudo apt-get install -y python3-pip
-          pip3 install -r requirements.txt
-          pip3 install pyinstaller
+          pip3 install --break-system-packages -r requirements.txt
+          pip3 install --break-system-packages pyinstaller
           pyinstaller riitag-rpc.spec
     - name: Publish Build Artifacts
       uses: actions/upload-artifact@master
