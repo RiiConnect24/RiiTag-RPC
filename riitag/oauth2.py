@@ -29,15 +29,12 @@ class OAuth2Token:
         self.last_refresh = kwargs.pop('last_refresh', time.time())
 
         if kwargs:
-            raise ValueError('Unexpected arguments: ' + str(kwargs.keys()))
+            raise ValueError(f'Unexpected arguments: {str(kwargs.keys())}')
 
     @property
     def needs_refresh(self):
         curr_time = time.time()
-        if curr_time - self.last_refresh > self.expires_in:
-            return True
-
-        return False
+        return curr_time - self.last_refresh > self.expires_in
 
     def save(self, fn):
         data = {
@@ -86,7 +83,7 @@ class OAuth2Token:
             'Content-Type': 'application/json',
             'Authorization': f'Bearer {self.access_token}'
         }
-        r = requests.get(API_ENDPOINT + '/users/@me', headers=headers)
+        r = requests.get(f'{API_ENDPOINT}/users/@me', headers=headers)
         r.raise_for_status()
 
         return User(**r.json())
@@ -102,13 +99,9 @@ class RequestHandler(BaseHTTPRequestHandler):
         query_str = urllib.parse.urlparse(self.path).query
         query = urllib.parse.parse_qs(query_str)
         code = query.get('code')
-        if not code:
+        if not code or len(code) != 1:
             self.handle_400()
             return
-        elif len(code) != 1:
-            self.handle_400()
-            return
-
         self.server.code = code[0]
 
         self.send_response(200)
@@ -171,15 +164,14 @@ class OAuth2Client:
         }
         query_str = urllib.parse.urlencode(query)
 
-        return AUTHORIZE_ENDPOINT + '?' + query_str
+        return f'{AUTHORIZE_ENDPOINT}?{query_str}'
 
     def wait_for_code(self):
         if not self._http_server:
             raise RuntimeError('Server not yet started.')
 
         while True:
-            code = self._http_server.code
-            if code:
+            if code := self._http_server.code:
                 return code
 
     def get_token(self, code):
@@ -197,9 +189,7 @@ class OAuth2Client:
         r = requests.post(TOKEN_ENDPOINT, data=payload, headers=headers)
         r.raise_for_status()
 
-        token = OAuth2Token(self, **r.json())
-
-        return token
+        return OAuth2Token(self, **r.json())
 
     def start_server(self, port: int) -> None:
         if self._http_server:  # already initialized
