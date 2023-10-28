@@ -8,6 +8,7 @@ jobs:
   Build-PC:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [windows-2022, ubuntu-22.04, ubuntu-20.04, macos-12]
 
@@ -24,6 +25,9 @@ jobs:
       run: pip install --break-system-packages pyinstaller
     - name: Build RiiTag RPC
       run: pyinstaller riitag-rpc.spec
+    - name: Mark as executable
+      if: ${{ matrix.os != 'windows-2022' }}
+      run: chmod -R +x dist/
     - name: Publish Build Artifacts
       uses: actions/upload-artifact@master
       with:
@@ -55,6 +59,7 @@ jobs:
           pip3 install --break-system-packages -r requirements.txt
           pip3 install --break-system-packages pyinstaller
           pyinstaller riitag-rpc.spec
+          chmod +x -R dist/
     - name: Publish Build Artifacts
       uses: actions/upload-artifact@master
       with:
