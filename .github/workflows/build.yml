@@ -103,11 +103,11 @@ jobs:
       - name: Collect artifacts
         run: |
           mkdir -p releases
-          mv ubuntu22/riitag-rpc releases/RiiTag-RPC_Ubuntu22
-          mv ubuntu20/riitag-rpc releases/RiiTag-RPC_Ubuntu20
-          mv    macos/riitag-rpc releases/RiiTag-RPC_MacOS
-          mv  windows/riitag-rpc releases/RiiTag-RPC_Windows
-          mv    rpi4b/riitag-rpc releases/RiiTag-RPC_Rpi4B
+          mv ubuntu22/riitag-rpc     releases/RiiTag-RPC_Ubuntu22
+          mv ubuntu20/riitag-rpc     releases/RiiTag-RPC_Ubuntu20
+          mv    macos/riitag-rpc     releases/RiiTag-RPC_MacOS
+          mv  windows/riitag-rpc.exe releases/RiiTag-RPC_Windows
+          mv    rpi4b/riitag-rpc     releases/RiiTag-RPC_Rpi4B
           tar -cvf all-artifacts.tar.bz2 releases/
 
       - name: Upload collected artifacts
