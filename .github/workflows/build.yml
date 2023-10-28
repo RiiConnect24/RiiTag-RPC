@@ -68,9 +68,37 @@ jobs:
 
   Collect-Artifacts:
     runs-on: ubuntu-22.04
+    needs: [Build-PC, Build-RPI]
     steps:
-      - name: Download artifacts
+      - name: Download ubuntu-22.04-x64
         uses: actions/download-artifact@v3
+        with:
+          name: ubuntu-22.04-x64
+          path: RiiTag-RPC_Ubuntu22
+
+      - name: Download ubuntu-20.04-x64
+        uses: actions/download-artifact@v3
+        with:
+          name: ubuntu-20.04-x64
+          path: RiiTag-RPC_Ubuntu20
+
+      - name: Download macos-12-x64
+        uses: actions/download-artifact@v3
+        with:
+          name: macos-12-x64
+          path: RiiTag-RPC_MacOS
+
+      - name: Download windows-2022-x64
+        uses: actions/download-artifact@v3
+        with:
+          name: windows-2022-x64
+          path: RiiTag-RPC_Windows
+
+      - name: Download rpi-4b-aarch64
+        uses: actions/download-artifact@v3
+        with:
+          name: rpi-4b-aarch64
+          path: RiiTag-RPC_Rpi4B
       
       - name: Display structure of downloaded files
         run: ls -R
