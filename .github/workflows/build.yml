@@ -65,3 +65,12 @@ jobs:
       with:
         name: rpi-4b-aarch64
         path: dist
+
+  Collect-Artifacts:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+      
+      - name: Display structure of downloaded files
+        run: ls -R
