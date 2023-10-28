@@ -108,6 +108,7 @@ jobs:
           mv    macos/riitag-rpc     releases/RiiTag-RPC_MacOS
           mv  windows/riitag-rpc.exe releases/RiiTag-RPC_Windows
           mv    rpi4b/riitag-rpc     releases/RiiTag-RPC_Rpi4B
+          chmod -R +x releases/
           tar -cvf all-artifacts.tar.bz2 releases/
 
       - name: Upload collected artifacts
