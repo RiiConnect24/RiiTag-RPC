@@ -352,10 +352,15 @@ class SetupMenu(Menu):
 
         time.sleep(2)
         self.waiting_layout.children = [
-            Window(FormattedTextControl(HTML(
-                '\n\n\n\n\n<b>Done!</b>\n\n'
-                f'Signed in as <b>{self.app.user.username}#{self.app.user.discriminator}</b>.\n\n'
-            )), align=WindowAlign.CENTER, wrap_lines=False)
+            Window(
+                FormattedTextControl(
+                    HTML(
+                        '\n\n\n\n\n<b>Done!</b>\n\n'
+                        'Signed in as <b>{}#{}</b>.\n\n'
+                    ).format(self.app.user.username, self.app.user.discriminator)
+                ),
+                align=WindowAlign.CENTER, wrap_lines=False
+            )
         ]
         self.update()
 
@@ -446,10 +451,10 @@ class MainMenu(Menu):
                 console: str = console_and_game_id[0]
                 game_id: str = console_and_game_id[1]
 
-                label_text = f'<b>-</b> {game_id} ({console.title()})'
+                label_text = HTML('<b>-</b> {} ({})').format(game_id, console.title())
             else:
-                label_text = f'<b>-</b> {console_and_game_id[0]}'
-            game_labels.append(Label(HTML(label_text)))
+                label_text = HTML('<b>-</b> {}').format(console_and_game_id[0])
+            game_labels.append(Label(label_text))
 
         right_panel_layout = HSplit([])
         if self.right_panel_state == 'Menu':
@@ -467,8 +472,8 @@ class MainMenu(Menu):
                 Frame(
                     Box(
                         HSplit([
-                            Label(HTML(f'<b>Name:</b>   {self.riitag_info.name}')),
-                            Label(HTML(f'<b>Games:</b>  {len(game_labels)}')),
+                            Label(HTML('<b>Name:</b>   {}').format(self.riitag_info.name)),
+                            Label(HTML('<b>Games:</b>  {}').format(len(game_labels))),
                             *game_labels
                         ]), padding_left=3, padding_top=2
                     ), title='RiiTag'),
