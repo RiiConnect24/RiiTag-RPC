@@ -16,7 +16,7 @@ jobs:
     - name: Obtain latest version of the repository
       uses: actions/checkout@v4
     - name: Set up Python 3
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
     - name: Install requirements with PIP
@@ -29,7 +29,7 @@ jobs:
       if: ${{ matrix.os != 'windows-2022' }}
       run: chmod -R +x dist/
     - name: Publish Build Artifacts
-      uses: actions/upload-artifact@master
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.os }}-x64
         path: dist
@@ -61,7 +61,7 @@ jobs:
           pyinstaller riitag-rpc.spec
           chmod +x -R dist/
     - name: Publish Build Artifacts
-      uses: actions/upload-artifact@master
+      uses: actions/upload-artifact@v4
       with:
         name: rpi-4b-aarch64
         path: dist
@@ -111,8 +111,8 @@ jobs:
           chmod -R +x releases/
           tar -cvf all-artifacts.tar.bz2 releases/
 
-      - name: Upload collected artifacts
-        uses: actions/upload-artifact@v3
+      - name: Publish collected artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: all-artifacts
           path: all-artifacts.tar.bz2
