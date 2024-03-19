@@ -173,7 +173,7 @@ class SplashScreen(Menu):
         return HSplit([
             Window(FormattedTextControl(BANNER), align=WindowAlign.CENTER),
             Window(FormattedTextControl(
-                f'{self.app.version_string}\nCreated by DismissedGuy\n\n\n{self.status_str}'),
+                f'{self.app.version_string}\nCreated by Mike Almeloo\n\n\n{self.status_str}'),
                 align=WindowAlign.CENTER
             )
         ])
