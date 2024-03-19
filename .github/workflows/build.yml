@@ -14,7 +14,7 @@ jobs:
 
     steps:
     - name: Obtain latest version of the repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Set up Python 3
       uses: actions/setup-python@v4
       with:
@@ -45,7 +45,7 @@ jobs:
           cpu_info: cpuinfo/raspberrypi_4b
           base_image: raspios_lite_arm64:latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Build Raspberry pi release
       uses: pguyot/arm-runner-action@v2
       with:
@@ -71,31 +71,31 @@ jobs:
     needs: [Build-PC, Build-RPI]
     steps:
       - name: Download ubuntu-22.04-x64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ubuntu-22.04-x64
           path: ubuntu22
 
       - name: Download ubuntu-20.04-x64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ubuntu-20.04-x64
           path: ubuntu20
 
       - name: Download macos-12-x64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: macos-12-x64
           path: macos
 
       - name: Download windows-2022-x64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: windows-2022-x64
           path: windows
 
       - name: Download rpi-4b-aarch64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: rpi-4b-aarch64
           path: rpi4b
