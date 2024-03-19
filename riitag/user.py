@@ -116,7 +116,7 @@ class RiitagTitle:
     }
     REGION = (
         'EN',
-        'US'
+        'US',
         'JA'
     )
     FILE_TYPES = (
